@@ -1,10 +1,3 @@
-/**
- * [x] Must be installable via npm and bower: package.json and bower.json
- * [x] Must be loadable via npm and requirejs.
- * [x] Should manage dependencies.
- * [ ] May split in different files
- */
-
 /** ===============================================================
  * NPM and requireJS loader with dependencies loading
  * ================================================================ */
@@ -31,15 +24,6 @@
 function donutCommonCode(_) {
   return {
 
-    /**
-     * @todo data migration
-     *
-     *  User:
-     *    @[USERNAME](user:OBJECTID) ==> [@:OBJECTID:USERNAME]
-     *  Room:
-     *    #NAME ==> [#:OBJECTID:NAME]
-     */
-
     objectIdPattern: /^[0-9a-f]{24}$/i,
 
     roomNamePattern: /^#[-a-z0-9\._|[\]^]{3,24}$/i,
@@ -52,7 +36,7 @@ function donutCommonCode(_) {
     mentionsRawPattern: /([#@]{1}[-a-z0-9\._|[\]^]{3,24})/ig,
 
     // for searching markuped message string (e.g.: [@:ObjectId():USERNAME] or [#:ObjectId():NAME])
-    mentionsMarkupPattern: /\[([#@]{1}):([0-9a-f]{24}):([-a-z0-9\._|[\]^]{3,24})]/ig,
+    mentionsMarkupPattern: /\[([#@]{1}):([0-9a-f]{24}):([#@]{1}[-a-z0-9\._|[\]^]{3,23})]/ig,
 
     /**
      * Find user and room mention in string and return occurences as an array
@@ -120,8 +104,51 @@ function donutCommonCode(_) {
      * @param string
      * @returns {*}
      */
-    replaceMentionMarkups: function(string) {
-      // @todo
+    markupMentions: function(string, mention, id, title) {
+      if (mention.substr(0, 1) === '#')
+        return string.replace(mention, '[#:'+ id+':'+ title+']');
+      else if (mention.substr(0, 1) === '@')
+        return string.replace(mention, '[@:'+ id+':@'+ title+']');
+    },
+
+    /**
+     * Find and replace mentions in string with underscore template parameter
+     * @param string
+     * @param template Function
+     * @param options
+     * @returns String
+     */
+    htmlMentions: function(string, template, options) {
+      options = options || {};
+      var mentions = this.findMarkupedMentions(string);
+      if (!mentions.length)
+        return string;
+
+      _.each(mentions, function(m) {
+        var html = template({
+          mention: m,
+          options: options
+        });
+        string = string.replace(m.match, html);
+      });
+
+      return string;
+    },
+
+    /**
+     * Find and replace mentions with text
+     * @param string
+     * @returns String
+     */
+    textMentions: function(string) {
+      var mentions = this.findMarkupedMentions(string);
+      if (!mentions.length)
+        return string;
+
+      _.each(mentions, function(m) {
+        string = string.replace(m.match, m.title);
+      });
+
       return string;
     },
 
