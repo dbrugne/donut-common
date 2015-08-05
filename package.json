@@ -1,0 +1,24 @@
+{
+  "name": "donut-common",
+  "version": "1.0.0",
+  "description": "DONUT platform common logic and code for Web and mobile client.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dbrugne/donut-common.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dbrugne/donut-common/issues"
+  },
+  "homepage": "https://github.com/dbrugne/donut-common",
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+  }
+}
