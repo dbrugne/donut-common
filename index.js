@@ -24,6 +24,15 @@
 function donutCommonCode(_) {
   return {
 
+    /**
+     * Escape RegExp reserved chars from string
+     * @param string
+     * @returns string
+     */
+    regExpEscape: function(string) {
+      return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    },
+
     objectIdPattern: /^[0-9a-f]{24}$/i,
 
     roomNamePattern: /^#[-a-z0-9\._|[\]^]{3,24}$/i,
@@ -36,7 +45,7 @@ function donutCommonCode(_) {
     mentionsRawPattern: /([#@]{1}[-a-z0-9\._|[\]^]{3,24})/ig,
 
     // for searching markuped message string (e.g.: [@:ObjectId():USERNAME] or [#:ObjectId():NAME])
-    mentionsMarkupPattern: /\[([#@]{1}):([0-9a-f]{24}):([#@]{1}[-a-z0-9\._|[\]^]{3,23})]/ig,
+    mentionsMarkupPattern: /\[([#@]{1}):([0-9a-f]{24}):([-a-z0-9\._|[\]^]{3,23})]/ig,
 
     /**
      * Find user and room mention in string and return occurences as an array
@@ -75,7 +84,7 @@ function donutCommonCode(_) {
             ? 'user'
             : 'room',
           id    : mention[2],
-          title : mention[3]
+          title : mention[1]+mention[3]
         };
         mentions.push(m);
       }
@@ -100,15 +109,15 @@ function donutCommonCode(_) {
     },
 
     /**
-     * Replace mentions markups in given string
+     * Replace raw mentions with markups in given string
      * @param string
      * @returns {*}
      */
     markupMentions: function(string, mention, id, title) {
       if (mention.substr(0, 1) === '#')
-        return string.replace(mention, '[#:'+ id+':'+ title+']');
+        return string.replace(mention, '[#:'+ id+':'+ title.replace('#', '')+']');
       else if (mention.substr(0, 1) === '@')
-        return string.replace(mention, '[@:'+ id+':@'+ title+']');
+        return string.replace(mention, '[@:'+ id+':'+ title+']');
     },
 
     /**
@@ -124,19 +133,23 @@ function donutCommonCode(_) {
       if (!mentions.length)
         return string;
 
-      _.each(mentions, function(m) {
+      var already = [];
+      _.each(mentions, _.bind(function(m) {
+        if (already.indexOf(m.match) !== -1)
+          return;
         var html = template({
           mention: m,
           options: options
         });
-        string = string.replace(m.match, html);
-      });
+        string = string.replace(new RegExp(this.regExpEscape(m.match), 'g'), html);
+        already.push(m.match);
+      }, this));
 
       return string;
     },
 
     /**
-     * Find and replace mentions with text
+     * Find and replace mentions markup with text
      * @param string
      * @returns String
      */
@@ -145,9 +158,9 @@ function donutCommonCode(_) {
       if (!mentions.length)
         return string;
 
-      _.each(mentions, function(m) {
-        string = string.replace(m.match, m.title);
-      });
+      _.each(mentions, _.bind(function(m) {
+        string = string.replace(new RegExp(this.regExpEscape(m.match), 'g'), m.title);
+      }, this));
 
       return string;
     },
