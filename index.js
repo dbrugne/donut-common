@@ -8,7 +8,10 @@
   if (typeof module !== 'undefined' && module.exports) {
     // NPM
     var _ = require('underscore');
-    module.exports = donutCommonCode(_);
+    var linkify = require('linkifyjs');
+    require('linkifyjs/plugins/hashtag')(linkify);
+    require('./lib/linkifyjs-mention')(linkify);
+    module.exports = donutCommonCode(_, linkify);
   } else if (typeof require !== 'undefined' && typeof define !== 'undefined') {
     // requireJS
     define(['underscore'], function(_) {
@@ -189,6 +192,71 @@ function donutCommonCode(_, linkify) {
       }, this));
 
       return string;
+    },
+
+
+    /**
+     * Find link, email, room and user mentions in string and markup it.
+     * @param string
+     * @param enhanceCallback Function
+     * @param finalCallback Function
+     */
+    markupString: function(string, enhanceCallback, finalCallback) {
+      if (!_.isFunction(finalCallback))
+        throw('callback is not a function');
+
+      // pre-processing: identify "elements" to markup
+      var links = [];
+      var users = [];
+      var rooms = [];
+      var emails = [];
+      _.each(linkify.find(string), function(link) {
+        if (link.type == 'hashtag') {
+          rooms.push({
+            match: link.value,
+            name: link.value
+          });
+        } else if (link.type == 'mention') {
+          users.push({
+            match: link.value,
+            username: link.value.replace('@', '')
+          });
+        } else if (link.type == 'url') {
+          links.push({
+            match: link.value,
+            href: link.href
+          });
+        } else if (link.type == 'email') {
+          emails.push({
+            match: link.value,
+            href: link.href
+          });
+        }
+      });
+
+      // processing: retrieve "entities" to markup
+      var fn = function(err, string, links, rooms, users, emails) {
+        if (err)
+          return finalCallback(err);
+
+        // post-processing
+        _.each(rooms, function(e) {
+          string = string.replace(e.match, '[#:' + e.id + ':' + e.match.replace('#', '') + ']');
+        });
+        _.each(users, function(e) {
+          string = string.replace(e.match, '[@:' + e.id + ':' + e.username + ']');
+        });
+        _.each(links, function(e) {
+          string = string.replace(e.match, '[url:' + e.match + ':' + e.href + ']');
+        });
+        _.each(emails, function(e) {
+          string = string.replace(e.match, '[email:' + e.match + ':' + e.href + ']');
+        });
+
+        // final
+        finalCallback(null, string, links, rooms, users, emails);
+      };
+      enhanceCallback(string, links, rooms, users, emails, fn);
     },
 
     /******************************************************************

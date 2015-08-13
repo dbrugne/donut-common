@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/dbrugne/donut-common",
   "dependencies": {
+    "linkifyjs": "^2.0.0-beta.4",
     "underscore": "^1.8.3"
   }
 }
