@@ -1,6 +1,8 @@
-/** ===============================================================
+/******************************************************************
+ *
  * NPM and requireJS loader with dependencies loading
- * ================================================================ */
+ *
+ ******************************************************************/
 (function() {
   var exports;
   if (typeof module !== 'undefined' && module.exports) {
@@ -18,10 +20,12 @@
   }
 })();
 
-/** ===============================================================
+/******************************************************************
+ *
  * Common code and logics
- * ================================================================ */
-function donutCommonCode(_) {
+ *
+ ******************************************************************/
+function donutCommonCode(_, linkify) {
   return {
 
     /**
@@ -33,13 +37,35 @@ function donutCommonCode(_) {
       return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
     },
 
-    objectIdPattern: /^[0-9a-f]{24}$/i,
+    /**
+     * Return a RegExp object that match subject equals the full string
+     * @param string
+     * @param flag
+     * @returns {RegExp}
+     */
+    regExpBuildExact: function(string, flag) {
+      flag = flag || 'i';
+      string = ''+string;
+      return new RegExp('^' + this.regExpEscape(string) + '$', flag);
+    },
 
-    roomNamePattern: /^#[-a-z0-9\._|[\]^]{3,24}$/i,
+    /**
+     * Return a RegExp object that match for string occurence in subject
+     * @param string
+     * @param flag
+     * @returns {RegExp}
+     */
+    regExpBuildContains: function(string, flag) {
+      flag = flag || 'i';
+      string = ''+string;
+      return new RegExp(this.regExpEscape(string), flag);
+    },
 
-    userUsernamePattern : /^[-a-z0-9\._|^]{3,15}$/i,
-
-    roomTopicPattern: /^.{0,512}$/i,
+    /******************************************************************
+     *
+     * Mentions, link detection and markuping
+     *
+     ******************************************************************/
 
     // for searching in raw message string (e.g.: '#name' or '@username')
     mentionsRawPattern: /([#@]{1}[-a-z0-9\._|[\]^]{3,24})/ig,
@@ -164,6 +190,20 @@ function donutCommonCode(_) {
 
       return string;
     },
+
+    /******************************************************************
+     *
+     * String validation
+     *
+     ******************************************************************/
+
+    objectIdPattern: /^[0-9a-f]{24}$/i,
+
+    roomNamePattern: /^#[-a-z0-9\._|[\]^]{3,24}$/i,
+
+    userUsernamePattern : /^[-a-z0-9\._|^]{3,15}$/i,
+
+    roomTopicPattern: /^.{0,512}$/i,
 
     /**
      * Validate user username string
