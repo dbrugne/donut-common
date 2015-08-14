@@ -9,8 +9,6 @@
     // NPM
     var _ = require('underscore');
     var linkify = require('linkifyjs');
-    require('linkifyjs/plugins/hashtag')(linkify);
-    require('./lib/linkifyjs-mention')(linkify);
     module.exports = donutCommonCode(_, linkify);
   } else if (typeof require !== 'undefined' && typeof define !== 'undefined') {
     // requireJS
@@ -30,6 +28,12 @@
  ******************************************************************/
 function donutCommonCode(_, linkify) {
   return {
+
+    /******************************************************************
+     *
+     * RegExp helpers
+     *
+     ******************************************************************/
 
     /**
      * Escape RegExp reserved chars from string
@@ -68,56 +72,163 @@ function donutCommonCode(_, linkify) {
      *
      * Mentions, link detection and markuping
      *
+     * [@¦55cdafb996cf9190695aebe9¦damien]
+     * [#¦67rfdfb996cf9190695dfre5¦donut]
+     * [url¦http://google.com¦http://google.com]
+     * [email¦damien@donut.me¦mailto:damien@donut.me]
+     *
      ******************************************************************/
 
-    // for searching in raw message string (e.g.: '#name' or '@username')
-    mentionsRawPattern: /([#@]{1}[-a-z0-9\._|[\]^]{3,24})/ig,
+    // search for #donut, #donutCoquin, #_donut_, #donut-coquin
+    rawRoomMentionPattern: /\s*(#([-a-z0-9_^]{3,23}))/ig,
+
+    // search for @damien, @Damien, @damien.brugne, @damien_brugne, @damien-brugne
+    rawUserMentionPattern: /\s*(@([-a-z0-9\._^]{3,15}))/ig,
+
+    // markup value separator
+    mvs: '¦',
 
     // for searching markuped message string (e.g.: [@:ObjectId():USERNAME] or [#:ObjectId():NAME])
-    mentionsMarkupPattern: /\[([#@]{1}):([0-9a-f]{24}):([-a-z0-9\._|[\]^]{3,23})]/ig,
+    markupPattern: /\[(#|@|url|email)¦([^¦]+)¦([^¦\]]+)]/ig,
 
     /**
-     * Find user and room mention in string and return occurences as an array
+     * Find link, email, room and user mentions in string and markup it.
      * @param string
-     * @returns {Array}
+     * @param enhanceCallback Function
+     * @param finalCallback Function
      */
-    findRawMentions: function(string) {
-      var mention;
-      var mentions = [];
-      // @doc: https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/RegExp/exec
-      while ((mention = this.mentionsRawPattern.exec(string)) !== null) {
-        var m = {
-          match : mention[0],
-          index : mention.index
-        };
-        mentions.push(m);
+    markupString: function(string, enhanceCallback, finalCallback) {
+      if (!_.isFunction(finalCallback))
+        throw('callback is not a function');
+
+      var bag = {
+        links  : [],
+        users  : [],
+        rooms  : [],
+        emails : []
+      };
+      var getNewKey = function() {
+        var count = 0;
+        return function() {
+          return '___donut_markup_'+(count++)+'___';
+        }
+      }();
+
+      // search for links
+      _.each(linkify.find(string), function(link) {
+        var key = getNewKey();
+        if (link.type == 'url') {
+          bag.links.push({
+            key: key,
+            match: link.value,
+            href: link.href
+          });
+          string = string.replace(link.value, key);
+        } else if (link.type == 'email') {
+          bag.emails.push({
+            key: key,
+            match: link.value,
+            href: link.href
+          });
+          string = string.replace(link.value, key);
+        }
+      });
+
+      // search for room mentions
+      var match;
+      var key;
+      while ((match = this.rawRoomMentionPattern.exec(string)) !== null) {
+        key = getNewKey()
+        bag.rooms.push({
+          key: key,
+          match: match[1],
+          name: match[2]
+        });
+        string = string.replace(match[1], key);
       }
 
-      return mentions;
+      // search for user mentions
+      while ((match = this.rawUserMentionPattern.exec(string)) !== null) {
+        key = getNewKey()
+        bag.users.push({
+          key: key,
+          match: match[1],
+          username: match[2]
+        });
+        string = string.replace(match[1], key);
+      }
+
+      // 3 - replace unique key with final markup
+      var mvs = this.mvs;
+      var replaceKeysWithMarkups = function(err, bag) {
+        if (err)
+          return finalCallback(err);
+
+        // post-processing
+        _.each(bag.rooms, function(e) {
+          if (e.id)
+            string = string.replace(e.key, '[#' + mvs + e.id + mvs + e.match.replace('#', '') + ']');
+          else
+            string = string.replace(e.key, e.match);
+        });
+        _.each(bag.users, function(e) {
+          if (e.id)
+            string = string.replace(e.key, '[@' + mvs + e.id + mvs + e.username + ']');
+          else
+            string = string.replace(e.key, e.match);
+        });
+        _.each(bag.links, function(e) {
+          string = string.replace(e.key, '[url' + mvs + e.match + mvs + e.href + ']');
+        });
+        _.each(bag.emails, function(e) {
+          string = string.replace(e.key, '[email' + mvs + e.match + mvs + e.href + ']');
+        });
+
+        // final
+        finalCallback(null, string, bag);
+      };
+
+      // 2 - optionnaly find entity in database and retrieve additionnal details
+      if (_.isFunction(enhanceCallback))
+        enhanceCallback(bag, replaceKeysWithMarkups);
+      else
+        replaceKeysWithMarkups(null, bag);
     },
 
     /**
-     * Find markups of user and room mentions in string and return occurences as an array
+     * Find markups in string and return occurences as an array
      * @param string
      * @returns {Array}
      */
-    findMarkupedMentions: function(string) {
-      var mention;
-      var mentions = [];
+    findMarkups: function(string) {
+      var markup;
+      var markups = [];
       // @doc: https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/RegExp/exec
-      while ((mention = this.mentionsMarkupPattern.exec(string)) !== null) {
-        var m = {
-          match : mention[0],
-          index : mention.index,
-          type  : (mention[1] === '@')
-            ? 'user'
-            : 'room',
-          id    : mention[2],
-          title : mention[1]+mention[3]
+      while ((markup = this.markupPattern.exec(string)) !== null) {
+        var element = {
+          match : markup[0],
         };
-        mentions.push(m);
+
+        if (markup[1] === '@') {
+          element.type = 'user';
+          element.title = markup[1] + markup[3];
+          element.id = markup[2];
+        } else if (markup[1] === '#') {
+          element.type = 'room';
+          element.title = markup[1] + markup[3];
+          element.id = markup[2];
+        } else if (markup[1] === 'url') {
+          element.type = markup[1];
+          element.title = markup[2];
+          element.href = markup[3];
+        } else if (markup[1] === 'email') {
+          element.type = markup[1];
+          element.title = markup[2];
+          element.href = markup[3];
+        }
+        markups.push(element);
       }
-      return mentions;
+      return markups;
     },
 
     /**
@@ -127,38 +238,29 @@ function donutCommonCode(_, linkify) {
      * @returns {boolean}
      */
     isUserMentionned: function(userId, string) {
-      var mentions = this.findMarkupedMentions(string);
+      var mentions = this.findMarkups(string);
       if (!mentions.length)
         return false;
 
       return !!_.find(mentions, function(m) {
-        if (m.id === userId)
+        if (m.type === 'user' && m.id === userId)
           return true;
       });
     },
 
-    /**
-     * Replace raw mentions with markups in given string
-     * @param string
-     * @returns {*}
-     */
-    markupMentions: function(string, mention, id, title) {
-      if (mention.substr(0, 1) === '#')
-        return string.replace(mention, '[#:'+ id+':'+ title.replace('#', '')+']');
-      else if (mention.substr(0, 1) === '@')
-        return string.replace(mention, '[@:'+ id+':'+ title+']');
-    },
+    defaultMarkupTemplate: _.template('<a class="<%= mention.type %>" href="<%= mention.href %>" style="<%= options.style %>"><%= mention.title %></a>'),
 
     /**
      * Find and replace mentions in string with underscore template parameter
      * @param string
-     * @param template Function
      * @param options
      * @returns String
      */
-    htmlMentions: function(string, template, options) {
+    markupToHtml: function(string, options) {
       options = options || {};
-      var mentions = this.findMarkupedMentions(string);
+      var template = options.template || this.defaultMarkupTemplate;
+
+      var mentions = this.findMarkups(string);
       if (!mentions.length)
         return string;
 
@@ -174,7 +276,7 @@ function donutCommonCode(_, linkify) {
         already.push(m.match);
       }, this));
 
-      return string;
+      return string.replace(/\n/g, '');
     },
 
     /**
@@ -182,8 +284,8 @@ function donutCommonCode(_, linkify) {
      * @param string
      * @returns String
      */
-    textMentions: function(string) {
-      var mentions = this.findMarkupedMentions(string);
+    markupToText: function(string) {
+      var mentions = this.findMarkups(string);
       if (!mentions.length)
         return string;
 
@@ -191,72 +293,7 @@ function donutCommonCode(_, linkify) {
         string = string.replace(new RegExp(this.regExpEscape(m.match), 'g'), m.title);
       }, this));
 
-      return string;
-    },
-
-
-    /**
-     * Find link, email, room and user mentions in string and markup it.
-     * @param string
-     * @param enhanceCallback Function
-     * @param finalCallback Function
-     */
-    markupString: function(string, enhanceCallback, finalCallback) {
-      if (!_.isFunction(finalCallback))
-        throw('callback is not a function');
-
-      // pre-processing: identify "elements" to markup
-      var links = [];
-      var users = [];
-      var rooms = [];
-      var emails = [];
-      _.each(linkify.find(string), function(link) {
-        if (link.type == 'hashtag') {
-          rooms.push({
-            match: link.value,
-            name: link.value
-          });
-        } else if (link.type == 'mention') {
-          users.push({
-            match: link.value,
-            username: link.value.replace('@', '')
-          });
-        } else if (link.type == 'url') {
-          links.push({
-            match: link.value,
-            href: link.href
-          });
-        } else if (link.type == 'email') {
-          emails.push({
-            match: link.value,
-            href: link.href
-          });
-        }
-      });
-
-      // processing: retrieve "entities" to markup
-      var fn = function(err, string, links, rooms, users, emails) {
-        if (err)
-          return finalCallback(err);
-
-        // post-processing
-        _.each(rooms, function(e) {
-          string = string.replace(e.match, '[#:' + e.id + ':' + e.match.replace('#', '') + ']');
-        });
-        _.each(users, function(e) {
-          string = string.replace(e.match, '[@:' + e.id + ':' + e.username + ']');
-        });
-        _.each(links, function(e) {
-          string = string.replace(e.match, '[url:' + e.match + ':' + e.href + ']');
-        });
-        _.each(emails, function(e) {
-          string = string.replace(e.match, '[email:' + e.match + ':' + e.href + ']');
-        });
-
-        // final
-        finalCallback(null, string, links, rooms, users, emails);
-      };
-      enhanceCallback(string, links, rooms, users, emails, fn);
+      return string.replace(/\n/g, '');
     },
 
     /******************************************************************
@@ -267,9 +304,17 @@ function donutCommonCode(_, linkify) {
 
     objectIdPattern: /^[0-9a-f]{24}$/i,
 
-    roomNamePattern: /^#[-a-z0-9\._|[\]^]{3,24}$/i,
+    /**
+     * Allowed: alphanumeric - _ ^
+     * Removed: . | [ ]
+     */
+    roomNamePattern: /^#[-a-z0-9_^]{3,24}$/i,
 
-    userUsernamePattern : /^[-a-z0-9\._|^]{3,15}$/i,
+    /**
+     * Allowed: alphanumeric - . _ ^
+     * Removed: |
+     */
+    userUsernamePattern : /^[-a-z0-9\._^]{3,15}$/i,
 
     roomTopicPattern: /^.{0,512}$/i,
 
