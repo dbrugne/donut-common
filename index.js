@@ -92,6 +92,17 @@ function donutCommonCode(_, linkify) {
     markupPattern: /\[(#|@|url|email)¦([^¦]+)¦([^¦\]]+)]/ig,
 
     /**
+     * Return a new unique key generator used for string replacement
+     * @returns {Function}
+     */
+    keyGenerator: function() {
+      var count = 0;
+      return function() {
+        return '___donut_markup_'+(count++)+'___';
+      }
+    },
+
+    /**
      * Find link, email, room and user mentions in string and markup it.
      * @param string
      * @param enhanceCallback Function
@@ -105,18 +116,14 @@ function donutCommonCode(_, linkify) {
         links  : [],
         users  : [],
         rooms  : [],
-        emails : []
+        emails : [],
+        all: []
       };
-      var getNewKey = function() {
-        var count = 0;
-        return function() {
-          return '___donut_markup_'+(count++)+'___';
-        }
-      }();
+      var keyGenerator = this.keyGenerator();
 
       // search for links
       _.each(linkify.find(string), function(link) {
-        var key = getNewKey();
+        var key = keyGenerator();
         if (link.type == 'url') {
           bag.links.push({
             key: key,
@@ -124,6 +131,7 @@ function donutCommonCode(_, linkify) {
             href: link.href
           });
           string = string.replace(link.value, key);
+          bag.all.push({ key: key, value: link.value });
         } else if (link.type == 'email') {
           bag.emails.push({
             key: key,
@@ -131,6 +139,7 @@ function donutCommonCode(_, linkify) {
             href: link.href
           });
           string = string.replace(link.value, key);
+          bag.all.push({ key: key, value: link.value });
         }
       });
 
@@ -138,24 +147,26 @@ function donutCommonCode(_, linkify) {
       var match;
       var key;
       while ((match = this.rawRoomMentionPattern.exec(string)) !== null) {
-        key = getNewKey()
+        key = keyGenerator();
         bag.rooms.push({
           key: key,
           match: match[1],
           name: match[2]
         });
         string = string.replace(match[1], key);
+        bag.all.push({ key: key, value: match[1] });
       }
 
       // search for user mentions
       while ((match = this.rawUserMentionPattern.exec(string)) !== null) {
-        key = getNewKey()
+        key = keyGenerator();
         bag.users.push({
           key: key,
           match: match[1],
           username: match[2]
         });
         string = string.replace(match[1], key);
+        bag.all.push({ key: key, value: match[1] });
       }
 
       // 3 - replace unique key with final markup
@@ -183,6 +194,12 @@ function donutCommonCode(_, linkify) {
         _.each(bag.emails, function(e) {
           string = string.replace(e.key, '[email' + mvs + e.match + mvs + e.href + ']');
         });
+
+        // cleanup matches that was -accidentally- removed from bag by enhanceCallback
+        _.each(bag.all, function(e) {
+          string = string.replace(e.key, e.value);
+        });
+        bag = _.omit(bag, 'all');
 
         // final
         finalCallback(null, string, bag);
@@ -248,10 +265,10 @@ function donutCommonCode(_, linkify) {
       });
     },
 
-    defaultMarkupTemplate: _.template('<a class="<%= mention.type %>" href="<%= mention.href %>" style="<%= options.style %>"><%= mention.title %></a>'),
+    defaultMarkupTemplate: _.template('<a class="<%= markup.type %>" href="<%= markup.href %>" style="<%= options.style %>"><%= markup.title %></a>'),
 
     /**
-     * Find and replace mentions in string with underscore template parameter
+     * Prepare a markuped string (from database) to be displayed in HTML context
      * @param string
      * @param options
      * @returns String
@@ -260,40 +277,63 @@ function donutCommonCode(_, linkify) {
       options = options || {};
       var template = options.template || this.defaultMarkupTemplate;
 
-      var mentions = this.findMarkups(string);
-      if (!mentions.length)
-        return string;
-
-      var already = [];
-      _.each(mentions, _.bind(function(m) {
-        if (already.indexOf(m.match) !== -1)
-          return;
-        var html = template({
-          mention: m,
-          options: options
-        });
-        string = string.replace(new RegExp(this.regExpEscape(m.match), 'g'), html);
-        already.push(m.match);
+      // find and replace markups
+      var keyGenerator = this.keyGenerator();
+      var markups = this.findMarkups(string);
+      _.each(markups, _.bind(function(m) {
+        m.key = keyGenerator();
+        string = string.replace(new RegExp(this.regExpEscape(m.match), ''), m.key);
       }, this));
 
-      return string.replace(/\n/g, '');
+      // html escaping (only on string with unique key)
+      string = _.escape(string);
+
+      // line breaks
+      string = string.replace(/\n/g, '<br>');
+
+      if (!markups.length)
+        return string;
+
+      _.each(markups, _.bind(function(m) {
+        var html = template({
+          markup: m,
+          options: options
+        });
+        string = string.replace(new RegExp(this.regExpEscape(m.key), ''), html);
+      }, this));
+
+      // remove line breaks from template
+      string = string.replace(/\n/g, '');
+
+      return string;
     },
 
     /**
-     * Find and replace mentions markup with text
+     * Prepare a markuped string (from database) to be displayed in text context
      * @param string
      * @returns String
      */
     markupToText: function(string) {
-      var mentions = this.findMarkups(string);
-      if (!mentions.length)
-        return string;
-
-      _.each(mentions, _.bind(function(m) {
-        string = string.replace(new RegExp(this.regExpEscape(m.match), 'g'), m.title);
+      // find and replace markups
+      var keyGenerator = this.keyGenerator();
+      var markups = this.findMarkups(string);
+      _.each(markups, _.bind(function(m) {
+        m.key = keyGenerator();
+        string = string.replace(new RegExp(this.regExpEscape(m.match), ''), m.key);
       }, this));
 
-      return string.replace(/\n/g, '');
+      // @todo handle line-breaks \n
+      string = string.replace(/<br>/g, '\n');
+
+      if (!markups.length)
+        return string;
+
+      // mentions
+      _.each(markups, _.bind(function(m) {
+        string = string.replace(new RegExp(this.regExpEscape(m.key), ''), m.title);
+      }, this));
+
+      return string;
     },
 
     /******************************************************************

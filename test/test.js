@@ -37,8 +37,18 @@ describe('markupString()', function () {
       fn(null, markups);
     }, function(err, string) {
       string.should.equal('#NotExistingRoom__');
-      done();
+      common.markupString('@donut and @support', function(markups, fn) {
+        var foundMention = _.find(markups.users, function(e) {
+          return (e.match === '@donut');
+        });
+        markups.users = [foundMention];
+        fn(null, markups);
+      }, function(err, string) {
+        string.should.equal('@donut and @support');
+        done();
+      });
     });
+
   });
   it('replace links', function (done) {
     common.markupString('http://test.com', null, function(err, string) {
@@ -70,6 +80,12 @@ describe('markupString()', function () {
   it('replace emails', function (done) {
     common.markupString('foo.bar@gmail.com', null, function(err, string) {
       string.should.equal('[email¦foo.bar@gmail.com¦mailto:foo.bar@gmail.com]');
+      done();
+    });
+  });
+  it('preserve line breaks', function (done) {
+    common.markupString('my first line\nmy second\rmy third\r\nmy last', null, function(err, string) {
+      string.should.equal('my first line\nmy second\rmy third\r\nmy last');
       done();
     });
   });
@@ -169,6 +185,12 @@ describe('markupToHtml()', function() {
       .should.equal('<a class="url" href="http://test.com/api/test.html?foo=bar&void" style="">http://test.com/api/test.html?foo=bar&void</a>');
     //common.markupToHtml('[url¦http://test.com/api/test.html?foo=bar&test[value:test]¦http://test.com/api/test.html?foo=bar&test[value:test]]')
     //  .should.equal('<a class="url" href="http://test.com/api/test.html?foo=bar&test[value:test]" style="">http://test.com/api/test.html?foo=bar&test[value:test]</a>');
+  });
+  it('preserve line breaks', function () {
+    common.markupToHtml('my first line\nmy second\nmy third\nmy last')
+      .should.equal('my first line<br>my second<br>my third<br>my last');
+    common.markupToHtml('my [#¦eedf43d2fddf4df2f3df4200¦donut] line\nmy [@¦eedf43d2fddf4df2f3df4200¦damien]')
+      .should.equal('my <a class="room" href="" style="">#donut</a> line<br>my <a class="user" href="" style="">@damien</a>');
   });
 
 });
