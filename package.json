@@ -1,5 +1,6 @@
 {
-  "name": "donut-common",
+  "name": "@dbrugne/donut-common",
+  "private": true,
   "version": "1.0.0",
   "description": "DONUT platform common logic and code for Web and mobile client.",
   "main": "index.js",
