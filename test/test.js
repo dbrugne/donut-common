@@ -3,6 +3,17 @@ var _ = require('underscore');
 var chai = require('chai');
 chai.should();
 
+describe('linkify', function() {
+
+  it('is function', function () {
+    common.getLinkify.should.be.a('function');
+  });
+  it('has find function', function () {
+    common.getLinkify().find.should.be.a('function');
+  });
+
+});
+
 describe('markupString()', function () {
 
   it('is function', function () {

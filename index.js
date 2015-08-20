@@ -70,7 +70,24 @@ function donutCommonCode(_, linkify) {
 
     /******************************************************************
      *
-     * Mentions, link detection and markuping
+     * LinkifyJS
+     *
+     * @doc: https://github.com/SoapBox/linkifyjs
+     *
+     ******************************************************************/
+
+    /**
+     * Return LinkifyJS instance on server and undefined on client
+     *
+     * @returns {LinkifyJS} | undefined
+     */
+    getLinkify: function() {
+      return linkify;
+    },
+
+    /******************************************************************
+     *
+     * Mentions and link detection and markuping
      *
      * [@¦55cdafb996cf9190695aebe9¦damien]
      * [#¦67rfdfb996cf9190695dfre5¦donut]
