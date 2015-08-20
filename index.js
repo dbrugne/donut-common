@@ -376,6 +376,18 @@ function donutCommonCode(_, linkify) {
     roomTopicPattern: /^.{0,512}$/i,
 
     /**
+     * Validate ObjectId() string
+     * @param string
+     * @returns {boolean}
+     */
+    validateObjectId: function (string) {
+      if (this.objectIdPattern.test(string)) {
+        return true;
+      }
+      return false;
+    },
+
+    /**
      * Validate user username string
      * @param string
      * @returns {boolean}
