@@ -70,6 +70,23 @@ function donutCommonCode(_, linkify) {
 
     /******************************************************************
      *
+     * Cloudinary helper
+     *
+     ******************************************************************/
+
+    cloudinarySize: function(url, size) {
+      if (!url || url === '')
+        return null;
+
+      size = size || 100;
+
+      return url
+              .replace(/__width__/, size)
+              .replace(/__height__/, size);
+    },
+
+    /******************************************************************
+     *
      * LinkifyJS
      *
      * @doc: https://github.com/SoapBox/linkifyjs

@@ -1,7 +1,8 @@
-var common = require('../index');
 var _ = require('underscore');
 var chai = require('chai');
-chai.should();
+var should = chai.should();
+
+var common = require('../index');
 
 describe('linkify', function() {
 
@@ -252,6 +253,30 @@ describe('special', function() {
         common.markupToHtml(string).should.equal('Cosplay is life <a class="user" href="" style="">@damien</a> <a class="user" href="" style="">@David</a> dans <a class="room" href="" style="">#donut</a> et <a class="url" href="http://google.com" style="">http://google.com</a> ainsi que <a class="url" href="http://google.com" style="">google.com</a>');
         done();
       });
+  });
+
+});
+
+describe('cloudinarySize', function() {
+
+  it('is function', function () {
+    common.cloudinarySize.should.be.a('function');
+  });
+  it('no url', function () {
+    should.equal(common.cloudinarySize(), null);
+    should.equal(common.cloudinarySize(''), null);
+    should.equal(common.cloudinarySize('', 120), null);
+  });
+  it('with size', function () {
+    common.cloudinarySize('https://res.cloudinary.com/roomly/image/upload/b_rgb:123456,c_fill,d_user-avatar-default.png,f_jpg,g_face,h___height__,w___width__/v1409643461/rciev5ubaituvx5bclnz.jpg', 120)
+      .should.equal('https://res.cloudinary.com/roomly/image/upload/b_rgb:123456,c_fill,d_user-avatar-default.png,f_jpg,g_face,h_120,w_120/v1409643461/rciev5ubaituvx5bclnz.jpg');
+  });
+  it('without size', function () {
+    common.cloudinarySize('https://res.cloudinary.com/roomly/image/upload/b_rgb:123456,c_fill,d_user-avatar-default.png,f_jpg,g_face,h___height__,w___width__/v1409643461/rciev5ubaituvx5bclnz.jpg')
+      .should.equal('https://res.cloudinary.com/roomly/image/upload/b_rgb:123456,c_fill,d_user-avatar-default.png,f_jpg,g_face,h_100,w_100/v1409643461/rciev5ubaituvx5bclnz.jpg');
+  });
+  it('no replacement', function () {
+    common.cloudinarySize('https://res.cloudinary.com/roomly/image/upload/v1409643461/rciev5ubaituvx5bclnz.jpg').should.equal('https://res.cloudinary.com/roomly/image/upload/v1409643461/rciev5ubaituvx5bclnz.jpg');
   });
 
 });
