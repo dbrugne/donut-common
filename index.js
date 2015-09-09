@@ -395,6 +395,8 @@ function donutCommonCode(_, linkify) {
 
     roomTopicPattern: /^.{0,512}$/i,
 
+    emailPattern: /[\w.+-]+@[\w.-]+\.[a-z]{2,4}/i,
+
     /**
      * Validate ObjectId() string
      * @param string
@@ -420,6 +422,19 @@ function donutCommonCode(_, linkify) {
         if (pattern2.test(string)) {
           return true;
         }
+      }
+      return false;
+    },
+
+    /**
+     * Validate user username string
+     * @param string
+     * @returns {boolean}
+     */
+    validateEmail: function (string) {
+      // Good length, only allowed chars.
+      if (this.emailPattern.test(string)) {
+        return true;
       }
       return false;
     },
