@@ -397,6 +397,8 @@ function donutCommonCode(_, linkify) {
 
     emailPattern: /[\w.+-]+@[\w.-]+\.[a-z]{2,4}/i,
 
+    passwordPattern: /([^\s]{6,})$/i,
+
     /**
      * Validate ObjectId() string
      * @param string
@@ -433,10 +435,17 @@ function donutCommonCode(_, linkify) {
      */
     validateEmail: function (string) {
       // Good length, only allowed chars.
-      if (this.emailPattern.test(string)) {
-        return true;
-      }
-      return false;
+      return this.emailPattern.test(string);
+    },
+
+    /**
+     * Validate user username string
+     * @param string
+     * @returns {boolean}
+     */
+    validatePassword: function (string) {
+      // Good length, only allowed chars.
+      return this.passwordPattern.test(string);
     },
 
     /**
