@@ -395,9 +395,11 @@ function donutCommonCode(_, linkify) {
 
     roomTopicPattern: /^.{0,512}$/i,
 
-    emailPattern: /[\w.+-]+@[\w.-]+\.[a-z]{2,4}/i,
-
-    passwordPattern: /([^\s]{6,})$/i,
+    roomModes: [
+      'everyone',
+      'allowed',
+      'password'
+    ],
 
     /**
      * Validate ObjectId() string
@@ -405,10 +407,7 @@ function donutCommonCode(_, linkify) {
      * @returns {boolean}
      */
     validateObjectId: function (string) {
-      if (this.objectIdPattern.test(string)) {
-        return true;
-      }
-      return false;
+      return (this.objectIdPattern.test(string));
     },
 
     /**
@@ -429,35 +428,12 @@ function donutCommonCode(_, linkify) {
     },
 
     /**
-     * Validate user username string
-     * @param string
-     * @returns {boolean}
-     */
-    validateEmail: function (string) {
-      // Good length, only allowed chars.
-      return this.emailPattern.test(string);
-    },
-
-    /**
-     * Validate user username string
-     * @param string
-     * @returns {boolean}
-     */
-    validatePassword: function (string) {
-      // Good length, only allowed chars.
-      return this.passwordPattern.test(string);
-    },
-
-    /**
      * Validate room name string
      * @param string
      * @returns {boolean}
      */
     validateName: function (string) {
-      if (this.roomNamePattern.test(string)) {
-        return true;
-      }
-      return false;
+      return (this.roomNamePattern.test(string));
     },
 
     /**
@@ -466,10 +442,33 @@ function donutCommonCode(_, linkify) {
      * @returns {boolean}
      */
     validateTopic: function (string) {
-      if (this.roomTopicPattern.test(string)) {
-        return true;
+      return (this.roomTopicPattern.test(string));
+    },
+
+    /**
+     * Validate modes
+     * @param string
+     * @returns {boolean}
+     */
+    validateMode: function (string) {
+      return (this.roomModes.indexOf(string) !== -1);
+    },
+
+    /******************************************************************
+     *
+     * Tools
+     *
+     ******************************************************************/
+
+    randomString: function (length) {
+      length = length || 6;
+      var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      var string = '';
+      for (var i = 0; i < length; i++) {
+        var index = Math.floor(Math.random() * chars.length);
+        string += chars[index];
       }
-      return false;
+      return string;
     }
 
   };
