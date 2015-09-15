@@ -396,9 +396,8 @@ function donutCommonCode(_, linkify) {
     roomTopicPattern: /^.{0,512}$/i,
 
     roomModes: [
-      'everyone',
-      'allowed',
-      'password'
+      'public',
+      'private'
     ],
 
     /**
