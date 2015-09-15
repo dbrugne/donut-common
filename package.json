@@ -1,6 +1,6 @@
 {
   "name": "@dbrugne/donut-common",
-  "version": "1.0.8",
+  "version": "1.0.81",
   "description": "DONUT platform common logic and code for Web and mobile client.",
   "main": "index.js",
   "scripts": {
