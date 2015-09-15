@@ -280,3 +280,21 @@ describe('cloudinarySize', function() {
   });
 
 });
+
+describe('validateMode', function() {
+
+  it('is function', function () {
+    common.validateMode.should.be.a('function');
+  });
+  it('empty', function () {
+    common.validateMode('').should.equal(false);
+  });
+  it('wrong value', function () {
+    common.validateMode('false').should.equal(false);
+  });
+  _.each(common.roomModes, function(mode){
+    it('required value: '+mode, function () {
+        common.validateMode(mode).should.equal(true);
+    });
+  });
+});
