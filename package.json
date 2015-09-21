@@ -1,6 +1,6 @@
 {
   "name": "@dbrugne/donut-common",
-  "version": "1.0.81",
+  "version": "1.1.0",
   "description": "DONUT platform common logic and code for Web and mobile client.",
   "main": "index.js",
   "scripts": {
@@ -17,10 +17,10 @@
   },
   "homepage": "https://github.com/dbrugne/donut-common",
   "dependencies": {
-    "linkifyjs": "^2.0.0-beta.4",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "chai": "latest"
+    "chai": "latest",
+    "linkifyjs": "^2.0.0-beta.4"
   }
 }
