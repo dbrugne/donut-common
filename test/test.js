@@ -276,20 +276,51 @@ describe('cloudinary', function() {
 
 });
 
-describe('mode', function() {
-
-  it('is function', function () {
-    common.validate.mode.should.be.a('function');
+describe('validate', function() {
+  describe('uri', function() {
+    it('is function', function () {
+      common.validate.uri.should.be.a('function');
+      common.validate.uriExtract.should.be.a('function');
+    });
+    it('invalid', function () {
+      common.validate.uri('').should.equal(false);
+      common.validate.uri('test').should.equal(false);
+      common.validate.uri('test#').should.equal(false);
+      common.validate.uri('test/').should.equal(false);
+      common.validate.uri('#test/').should.equal(false);
+      common.validate.uri('test/test').should.equal(false);
+    });
+    it('valid', function () {
+      common.validate.uri('#test').should.equal(true);
+      common.validate.uri('#test/test').should.equal(true);
+      common.validate.uri('#test_test/test-test').should.equal(true);
+    });
+    it('empty', function () {
+      common.validate.uriExtract('').should.equal(false);
+      common.validate.uriExtract('test').should.equal(false);
+      common.validate.uriExtract('test/test').should.equal(false);
+      common.validate.uriExtract('#').should.equal(false);
+    });
+    it('extract', function () {
+      common.validate.uriExtract('#test').should.eql({room: 'test'});
+      common.validate.uriExtract('#test/test').should.eql({ group: 'test', room: 'test' });
+      common.validate.uriExtract('#test_test/test-test').should.eql({ group: 'test_test', room: 'test-test' });
+    });
   });
-  it('empty', function () {
-    common.validate.mode('').should.equal(false);
-  });
-  it('wrong value', function () {
-    common.validate.mode('false').should.equal(false);
-  });
-  _.each(common.validate.roomModes, function(mode){
-    it('required value: '+mode, function () {
+  describe('mode', function() {
+    it('is function', function () {
+      common.validate.mode.should.be.a('function');
+    });
+    it('empty', function () {
+      common.validate.mode('').should.equal(false);
+    });
+    it('wrong value', function () {
+      common.validate.mode('false').should.equal(false);
+    });
+    _.each(common.validate.roomModes, function(mode){
+      it('required value: '+mode, function () {
         common.validate.mode(mode).should.equal(true);
+      });
     });
   });
 });
