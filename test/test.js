@@ -71,7 +71,7 @@ describe('parser()', function () {
     parser('#donut/', null, function(err, string) {
       string.should.equal('#donut/');
       parser('#donut/', function(markups, fn) {
-        markups.rooms[0].id = 'eedf43d2fddf4df2f3df4234';
+        markups.groups[0].id = 'eedf43d2fddf4df2f3df4234';
         fn(null, markups);
       }, function(err, string) {
         string.should.equal('[#¦eedf43d2fddf4df2f3df4234¦donut/]');
