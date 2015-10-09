@@ -54,7 +54,18 @@ describe('parser()', function () {
         done();
       });
     });
-
+  });
+  it('replace room in group mention', function (done) {
+    parser('#donut/admin', null, function(err, string) {
+      string.should.equal('#donut/admin');
+      parser('#donut/test', function(markups, fn) {
+        markups.rooms[0].id = 'eedf43d2fddf4df2f3df4234';
+        fn(null, markups);
+      }, function(err, string) {
+        string.should.equal('[#¦eedf43d2fddf4df2f3df4234¦donut/test]');
+        done();
+      });
+    });
   });
   it('replace links', function (done) {
     parser('http://test.com', null, function(err, string) {
@@ -131,6 +142,15 @@ describe('_find()', function() {
     found.should.have.property('id').with.equal('eedf43d2fddf4df2f3df4200');
     found.should.have.property('title').with.equal('#donut');
   });
+  it('find room in group mention', function () {
+    var found = common.markup._find('[#¦eedf43d2fddf4df2f3df4200¦donut/test]');
+    found.should.be.length(1);
+    found = found[0];
+    found.should.have.property('match').with.equal('[#¦eedf43d2fddf4df2f3df4200¦donut/test]');
+    found.should.have.property('type').with.equal('room');
+    found.should.have.property('id').with.equal('eedf43d2fddf4df2f3df4200');
+    found.should.have.property('title').with.equal('#donut/test');
+  });
   it('find link', function () {
     var found = common.markup._find('[url¦test.com¦http://test.com]');
     found.should.be.length(1);
@@ -174,6 +194,10 @@ describe('toHtml()', function() {
     common.markup.toHtml('[#¦eedf43d2fddf4df2f3df4200¦donut]')
       .should.equal('<a class="room" href="" style="">#donut</a>');
   });
+  it('room in group mention', function () {
+    common.markup.toHtml('[#¦eedf43d2fddf4df2f3df4200¦donut/test]')
+      .should.equal('<a class="room" href="" style="">#donut/test</a>');
+  });
   it('user mention', function () {
     common.markup.toHtml('[@¦eedf43d2fddf4df2f3df4200¦damien]')
       .should.equal('<a class="user" href="" style="">@damien</a>');
@@ -209,6 +233,10 @@ describe('toText()', function() {
   it('room mention', function () {
     common.markup.toText('[#¦eedf43d2fddf4df2f3df4200¦donut]')
       .should.equal('#donut');
+  });
+  it('room in group mention', function () {
+    common.markup.toText('[#¦eedf43d2fddf4df2f3df4200¦donut/test]')
+      .should.equal('#donut/test');
   });
   it('user mention', function () {
     common.markup.toText('[@¦eedf43d2fddf4df2f3df4200¦damien]')
