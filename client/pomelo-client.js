@@ -6,9 +6,8 @@ var io = require('socket.io-client');
 
 var Pomelo = function (options) {
   this.options = options;
-  this.current = ''; // current connector URL
-  this.token = null; // current JWT token used for WS authentication
-  this.socket = null; // current sio socket
+  this.token = null; // current authentication token
+  this.socket = null; // current socket.io socket
 
   // pomelo protocol message header size
   // (https://github.com/NetEase/pomelo/wiki/Communication-Protocol)
@@ -107,11 +106,12 @@ Pomelo.prototype._sio = function (server) {
     query: 'device=' + this.options.device
   };
 
-  this.current = server.host;
+  var url = server.host;
   if (server.port) {
-    this.current += ':' + server.port;
+    url += ':' + server.port;
   }
-  this.socket = io(this.current, options);
+
+  this.socket = io(url, options);
 
   // triggered when server has confirmed user authentication
   this.socket.on('authenticated', _.bind(function () {
@@ -176,8 +176,8 @@ Pomelo.prototype._sio = function (server) {
 
   // socket listener are set, go connect, then authenticate
   this.socket.on('connect', _.bind(function () {
-    this.options.debug('connected to ' + that.current);
-    this.socket.emit('authenticate', { token: that.token });
+    this.options.debug('connected to ' + url);
+    this.socket.emit('authenticate', { token: this.token });
   }, this));
 };
 
