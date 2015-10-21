@@ -35,7 +35,7 @@ module.exports = function (options) {
   // pushed event from ws
   var that = this;
   pomelo.on('all', function (name, data) {
-    options.debug('ws:push:' + name, data);
+    options.debug('ws:' + name, data);
     ws.trigger(name, data);
   });
 

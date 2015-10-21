@@ -186,8 +186,6 @@ Pomelo.prototype._requestWelcome = function () {
     if (data.error) {
       return this.options.debug('connector.entryHandler.enter returns error', data);
     }
-
-    this.options.debug('welcome received');
     this.trigger('welcome', data);
   }, this));
 };
