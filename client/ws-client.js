@@ -101,8 +101,11 @@ Ws.prototype.groupAllow = function (groupId, userId, callback) {
   var data = {group_id: groupId, user_id: userId};
   this.pomeloRequest('chat.groupAllowHandler.call', data, callback);
 };
-Ws.prototype.groupBan = function (groupId, userId, callback) {
+Ws.prototype.groupBan = function (groupId, userId, reason, callback) {
   var data = {group_id: groupId, user_id: userId};
+  if (reason) {
+    data.reason = reason;
+  }
   this.pomeloRequest('chat.groupBanHandler.call', data, callback);
 };
 Ws.prototype.groupDeban = function (groupId, userId, callback) {
