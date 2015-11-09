@@ -372,10 +372,10 @@ describe('validate', function() {
       common.validate.name('').should.equal(false);
     });
     it('too small name', function () {
-      common.validate.name('ab').should.equal(false);
+      common.validate.name('a').should.equal(false);
     });
     it('too long name', function () {
-      common.validate.name('abcdefghijklmnopqrstu').should.equal(false);
+      common.validate.name('abcdefghijklmnop').should.equal(false);
     });
     it('reserved name', function () {
       common.validate.name('search').should.equal(false);
@@ -389,8 +389,8 @@ describe('validate', function() {
       common.validate.name('abc').should.equal(true);
       common.validate.name('-abc').should.equal(true);
       common.validate.name('_abc').should.equal(true);
-      common.validate.name('abcdefghijklmnopqrst').should.equal(true);
-      common.validate.name('abcdefghijklmnopqrst').should.equal(true);
+      common.validate.name('abcdefghijklmno').should.equal(true);
+      common.validate.name('abcdefghijklmno').should.equal(true);
     });
   });
   describe('group name', function() {
@@ -401,10 +401,10 @@ describe('validate', function() {
       common.validate.group('').should.equal(false);
     });
     it('too small name', function () {
-      common.validate.group('ab').should.equal(false);
+      common.validate.group('a').should.equal(false);
     });
     it('too long name', function () {
-      common.validate.group('abcdefghijklmnopqrstu').should.equal(false);
+      common.validate.group('abcdefghijklmnop').should.equal(false);
     });
     it('reserved name', function () {
       common.validate.group('search').should.equal(false);
@@ -418,8 +418,8 @@ describe('validate', function() {
       common.validate.group('abc').should.equal(true);
       common.validate.group('-abc').should.equal(true);
       common.validate.group('_abc').should.equal(true);
-      common.validate.group('abcdefghijklmnopqrst').should.equal(true);
-      common.validate.group('abcdefghijklmnopqrst').should.equal(true);
+      common.validate.group('abcdefghijklmno').should.equal(true);
+      common.validate.group('abcdefghijklmno').should.equal(true);
     });
   });
 });
