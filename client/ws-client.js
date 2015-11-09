@@ -42,16 +42,10 @@ Ws.prototype.pomeloRequest = function (route, data, callback) {
 Ws.prototype.home = function (callback) {
   this.pomeloRequest('chat.homeHandler.call', callback);
 };
-Ws.prototype.search = function (search, rooms, users, withGroup, limit, skip, light, privateGroupRooms, callback) {
+Ws.prototype.search = function (search, options, callback) {
   var data = {
     search: search, // string to search for
-    limit: limit || 100,
-    skip: skip || 0,
-    light: (light), // if the search should return a light version of results or not
-    rooms: (rooms), // if we should search for rooms
-    users: (users), // if we should search for users
-    with_group: (withGroup), // if we should search room in a specific group (string)
-    private_group_rooms: (privateGroupRooms) // if we should search in private room in group
+    options: options
   };
   this.pomeloRequest('chat.searchHandler.call', data, callback);
 };
