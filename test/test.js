@@ -390,7 +390,6 @@ describe('validate', function() {
       common.validate.name('-abc').should.equal(true);
       common.validate.name('_abc').should.equal(true);
       common.validate.name('abcdefghijklmno').should.equal(true);
-      common.validate.name('abcdefghijklmno').should.equal(true);
     });
   });
   describe('group name', function() {
@@ -418,7 +417,6 @@ describe('validate', function() {
       common.validate.group('abc').should.equal(true);
       common.validate.group('-abc').should.equal(true);
       common.validate.group('_abc').should.equal(true);
-      common.validate.group('abcdefghijklmno').should.equal(true);
       common.validate.group('abcdefghijklmno').should.equal(true);
     });
   });
