@@ -364,20 +364,79 @@ describe('validate', function() {
       common.validate.uriExtract('#test_test/test-test').should.eql({ group: 'test_test', room: 'test-test' });
     });
   });
-  describe('mode', function() {
+  describe('room name', function() {
     it('is function', function () {
-      common.validate.mode.should.be.a('function');
+      common.validate.name.should.be.a('function');
     });
-    it('empty', function () {
-      common.validate.mode('').should.equal(false);
+    it('empty name', function () {
+      common.validate.name('').should.equal(false);
     });
-    it('wrong value', function () {
-      common.validate.mode('false').should.equal(false);
+    it('too small name', function () {
+      common.validate.name('ab').should.equal(false);
     });
-    _.each(common.validate.roomModes, function(mode){
-      it('required value: '+mode, function () {
-        common.validate.mode(mode).should.equal(true);
-      });
+    it('too long name', function () {
+      common.validate.name('abcdefghijklmnopqrstu').should.equal(false);
+    });
+    it('reserved name', function () {
+      common.validate.name('search').should.equal(false);
+      common.validate.name('notifications').should.equal(false);
+    });
+    it('invalid caracters', function () {
+      common.validate.name('/qsdqdsqsd').should.equal(false);
+      common.validate.name('%qsdqdsqsd').should.equal(false);
+    });
+    it('valid', function () {
+      common.validate.name('abc').should.equal(true);
+      common.validate.name('-abc').should.equal(true);
+      common.validate.name('_abc').should.equal(true);
+      common.validate.name('abcdefghijklmnopqrst').should.equal(true);
+      common.validate.name('abcdefghijklmnopqrst').should.equal(true);
+    });
+  });
+  describe('group name', function() {
+    it('is function', function () {
+      common.validate.group.should.be.a('function');
+    });
+    it('empty name', function () {
+      common.validate.group('').should.equal(false);
+    });
+    it('too small name', function () {
+      common.validate.group('ab').should.equal(false);
+    });
+    it('too long name', function () {
+      common.validate.group('abcdefghijklmnopqrstu').should.equal(false);
+    });
+    it('reserved name', function () {
+      common.validate.group('search').should.equal(false);
+      common.validate.group('notifications').should.equal(false);
+    });
+    it('invalid caracters', function () {
+      common.validate.group('/qsdqdsqsd').should.equal(false);
+      common.validate.group('%qsdqdsqsd').should.equal(false);
+    });
+    it('valid', function () {
+      common.validate.group('abc').should.equal(true);
+      common.validate.group('-abc').should.equal(true);
+      common.validate.group('_abc').should.equal(true);
+      common.validate.group('abcdefghijklmnopqrst').should.equal(true);
+      common.validate.group('abcdefghijklmnopqrst').should.equal(true);
+    });
+  });
+});
+
+describe('mode', function() {
+  it('is function', function () {
+    common.validate.mode.should.be.a('function');
+  });
+  it('empty', function () {
+    common.validate.mode('').should.equal(false);
+  });
+  it('wrong value', function () {
+    common.validate.mode('false').should.equal(false);
+  });
+  _.each(common.validate.roomModes, function(mode){
+    it('required value: '+mode, function () {
+      common.validate.mode(mode).should.equal(true);
     });
   });
 });
