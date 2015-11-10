@@ -420,6 +420,31 @@ describe('validate', function() {
       common.validate.group('abcdefghijklmno').should.equal(true);
     });
   });
+  describe('realname', function() {
+    it('is function', function () {
+      common.validate.realname.should.be.a('function');
+    });
+    it('empty realname', function () {
+      common.validate.realname('').should.equal(false);
+    });
+    it('too small realname', function () {
+      common.validate.realname('a').should.equal(false);
+    });
+    it('too long realname', function () {
+      common.validate.realname('abcdefghijklmnopqrstu').should.equal(false);
+    });
+    it('invalid caracters', function () {
+      common.validate.realname('/qsdqdsqsd').should.equal(false);
+      common.validate.realname('%qsdqdsqsd').should.equal(false);
+      common.validate.realname('qsdq_dsqsd').should.equal(false);
+    });
+    it('valid', function () {
+      common.validate.realname('abc').should.equal(true);
+      common.validate.realname('-abc').should.equal(true);
+      common.validate.realname('a bc').should.equal(true);
+      common.validate.realname('éïîàôAÄabcdefghij012').should.equal(true);
+    });
+  });
 });
 
 describe('mode', function() {
