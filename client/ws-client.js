@@ -485,8 +485,8 @@ Ws.prototype.userPreferencesUpdate = function (fields, callback) {
   var data = {data: fields};
   this.pomeloRequest('chat.preferencesUpdateHandler.call', data, callback);
 };
-Ws.prototype.accountEmail = function (email, callback) {
-  var data = {email: email};
+Ws.prototype.accountEmail = function (email, method, callback) {
+  var data = {email: email, method: method};
   this.pomeloRequest('chat.accountEmailHandler.call', data, callback);
 };
 Ws.prototype.accountPassword = function (newPassword, currentPassword, callback) {
