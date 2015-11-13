@@ -154,8 +154,8 @@ Ws.prototype.groupDeop = function (roomId, userId, callback) {
   }
   this.pomeloRequest('chat.groupDeopHandler.call', data, callback);
 };
-Ws.prototype.groupDomains = function (domain, method, callback) {
-  var data = {domain: domain, method: method};
+Ws.prototype.groupDomains = function (groupId, domain, method, callback) {
+  var data = {group_id: groupId, domain: domain, method: method};
   this.pomeloRequest('chat.groupMailDomainsHandler.call', data, callback);
 };
 
