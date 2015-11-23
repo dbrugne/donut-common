@@ -12,7 +12,8 @@ module.exports = function (options) {
       console.log.apply(console, arguments);
     },
     retrieveToken: _.noop,
-    invalidToken: _.noop
+    invalidToken: _.noop,
+    sio: {}
   });
 
   // pomelo-client

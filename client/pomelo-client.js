@@ -1,6 +1,5 @@
 var _ = require('underscore');
 var Backbone = require('backbone');
-var io = require('socket.io-client');
 
 // @source: https://github.com/gloomyzerg/pomelo-jsclient-socket.io-bower
 
@@ -94,7 +93,7 @@ Pomelo.prototype.notify = function (route, data) {
 
 Pomelo.prototype._sio = function (server) {
   // @doc: https://github.com/Automattic/engine.io-client#methods
-  var options = {
+  var options = _.default(this.options, {
     // multiplex: true,
     reconnection: true,
     // reconnectionDelay: 1000,
@@ -104,14 +103,14 @@ Pomelo.prototype._sio = function (server) {
     forceNew: true, // http://stackoverflow.com/questions/24566847/socket-io-client-connect-disconnect
                     // allow me to connect() disconnect() from console
     query: 'device=' + this.options.device
-  };
+  });
 
   var url = server.host;
   if (server.port) {
     url += ':' + server.port;
   }
 
-  this.socket = io(url, options);
+  this.socket = require('socket.io-client')(url, options); // lazy load
 
   // triggered when server has confirmed user authentication
   this.socket.on('authenticated', _.bind(function () {
