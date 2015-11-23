@@ -93,7 +93,7 @@ Pomelo.prototype.notify = function (route, data) {
 
 Pomelo.prototype._sio = function (server) {
   // @doc: https://github.com/Automattic/engine.io-client#methods
-  var options = _.default(this.options.sio, {
+  var options = _.defaults(this.options.sio, {
     // multiplex: true,
     reconnection: true,
     // reconnectionDelay: 1000,
