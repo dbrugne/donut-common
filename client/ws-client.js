@@ -65,21 +65,14 @@ Ws.prototype.groupId = function (identifier, callback) {
   this.pomeloRequest('chat.groupIdHandler.call', data, callback);
 };
 Ws.prototype.groupRead = function (groupId, what, callback) {
-  var data = {};
-  if (groupId) {
-    data.group_id = groupId;
-  } else {
+  if (!groupId) {
     return;
   }
-
+  var data = {
+    group_id: groupId
+  };
   if (what) {
     data.what = what;
-  } else {
-    data.what = {
-      users: true,
-      admin: true,
-      rooms: true
-    };
   }
 
   this.pomeloRequest('chat.groupReadHandler.call', data, callback);
@@ -208,21 +201,15 @@ Ws.prototype.roomTopic = function (roomId, topic, callback) {
   this.pomeloRequest('chat.roomTopicHandler.call', data, callback);
 };
 Ws.prototype.roomRead = function (roomId, what, callback) {
-  var data = {};
-  if (roomId) {
-    data.room_id = roomId;
-  } else {
+  if (!roomId) {
     return;
   }
 
+  var data = {
+    room_id: roomId
+  };
   if (what) {
     data.what = what;
-  } else {
-    data.what = {
-      more: false,
-      users: false,
-      admin: false
-    };
   }
 
   this.pomeloRequest('chat.roomReadHandler.call', data, callback);
@@ -428,12 +415,14 @@ Ws.prototype.userMessageEdit = function (userId, messageId, message, callback) {
   var data = {user_id: userId, event: messageId, message: message};
   this.pomeloRequest('chat.userMessageEditHandler.call', data, callback);
 };
-Ws.prototype.userRead = function (userId, callback) {
-  var data = {};
-  if (userId) {
-    data.user_id = userId;
-  } else {
+Ws.prototype.userRead = function (userId, what, callback) {
+  if (!userId) {
     return;
+  }
+
+  var data = { user_id: userId };
+  if (what) {
+    data.what = what;
   }
 
   this.pomeloRequest('chat.userReadHandler.call', data, callback);
