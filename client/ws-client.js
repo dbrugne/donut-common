@@ -77,17 +77,31 @@ Ws.prototype.groupRead = function (groupId, what, callback) {
 
   this.pomeloRequest('chat.groupReadHandler.call', data, callback);
 };
-Ws.prototype.groupJoinRequest = function (groupId, message, callback) {
+
+Ws.prototype.groupRequest = function (groupId, message, callback) {
   var data = {group_id: groupId};
   if (message) {
     data.message = message;
   }
-  this.pomeloRequest('chat.groupJoinRequestHandler.call', data, callback);
+  this.pomeloRequest('chat.groupRequestHandler.request', data, callback);
 };
-Ws.prototype.groupAllow = function (groupId, userId, callback) {
+Ws.prototype.groupRequestAccept = function (groupId, userId, callback) {
   var data = {group_id: groupId, user_id: userId};
-  this.pomeloRequest('chat.groupAllowHandler.call', data, callback);
+  this.pomeloRequest('chat.groupRequestHandler.accept', data, callback);
 };
+Ws.prototype.groupRequestRefuse = function (groupId, userId, callback) {
+  var data = {group_id: groupId, user_id: userId};
+  this.pomeloRequest('chat.groupRequestHandler.refuse', data, callback);
+};
+Ws.prototype.groupAllowedAdd = function (groupId, userId, callback) {
+  var data = {group_id: groupId, user_id: userId};
+  this.pomeloRequest('chat.groupAllowedHandler.add', data, callback);
+};
+Ws.prototype.groupAllowedRemove = function (groupId, userId, callback) {
+  var data = {group_id: groupId, user_id: userId};
+  this.pomeloRequest('chat.groupAllowedHandler.remove', data, callback);
+};
+
 Ws.prototype.groupBan = function (groupId, userId, reason, callback) {
   var data = {group_id: groupId, user_id: userId};
   if (reason) {
@@ -103,20 +117,10 @@ Ws.prototype.groupUsers = function (groupId, attributes, callback) {
   var data = {group_id: groupId, attributes: attributes};
   this.pomeloRequest('chat.groupUsersHandler.call', data, callback);
 };
-Ws.prototype.groupDisallow = function (groupId, userId, callback) {
-  var data = {group_id: groupId, user_id: userId};
-  this.pomeloRequest('chat.groupDisallowHandler.call', data, callback);
-};
-Ws.prototype.groupRefuse = function (groupId, userId, callback) {
-  var data = {group_id: groupId, user_id: userId};
-  this.pomeloRequest('chat.groupAllowHandler.refuse', data, callback);
-};
-
 Ws.prototype.groupCreate = function (groupName, callback) {
   var data = { group_name: groupName };
   this.pomeloRequest('chat.groupCreateHandler.call', data, callback);
 };
-
 Ws.prototype.groupUpdate = function (groupId, fields, callback) {
   var data = {group_id: groupId, data: fields};
   this.pomeloRequest('chat.groupUpdateHandler.call', data, callback);
