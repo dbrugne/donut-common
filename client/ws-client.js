@@ -77,7 +77,6 @@ Ws.prototype.groupRead = function (groupId, what, callback) {
 
   this.pomeloRequest('chat.groupReadHandler.call', data, callback);
 };
-
 Ws.prototype.groupRequest = function (groupId, message, callback) {
   var data = {group_id: groupId};
   if (message) {
@@ -101,7 +100,6 @@ Ws.prototype.groupAllowedRemove = function (groupId, userId, callback) {
   var data = {group_id: groupId, user_id: userId};
   this.pomeloRequest('chat.groupAllowedHandler.remove', data, callback);
 };
-
 Ws.prototype.groupBan = function (groupId, userId, reason, callback) {
   var data = {group_id: groupId, user_id: userId};
   if (reason) {
