@@ -181,9 +181,9 @@ Pomelo.prototype._sio = function (server) {
 };
 
 Pomelo.prototype._requestWelcome = function () {
-  this.request('connector.entryHandler.enter', {}, _.bind(function (data) {
+  this.request('connector.welcomeHandler.call', {}, _.bind(function (data) {
     if (data.error) {
-      return this.options.debug('connector.entryHandler.enter returns error', data);
+      return this.options.debug('connector.welcomeHandler.call returns error', data);
     }
     this.trigger('welcome', data);
   }, this));
