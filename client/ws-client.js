@@ -84,6 +84,10 @@ Ws.prototype.groupRequest = function (groupId, message, callback) {
   }
   this.pomeloRequest('chat.groupRequestHandler.request', data, callback);
 };
+Ws.prototype.groupLeave = function (groupId, callback) {
+  var data = {group_id: groupId};
+  this.pomeloRequest('chat.groupLeaveHandler.call', data, callback);
+};
 Ws.prototype.groupRequestAccept = function (groupId, userId, callback) {
   var data = {group_id: groupId, user_id: userId};
   this.pomeloRequest('chat.groupRequestHandler.accept', data, callback);
