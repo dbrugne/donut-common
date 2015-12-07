@@ -5,7 +5,6 @@ var Backbone = require('backbone');
 
 var Pomelo = function (options) {
   this.options = options;
-  this.token = null; // current authentication token
   this.socket = null; // current socket.io socket
 
   // pomelo protocol message header size
@@ -35,16 +34,11 @@ Pomelo.prototype.connect = function (host, port) {
     port: port || null
   };
 
-  if (this.token) {
-    return this._sio(server);
-  }
-
   this.options.retrieveToken(_.bind(function (err, token) {
     if (err) {
       return this.trigger('error', err);
     }
-    this.token = token;
-    this._sio(server);
+    this._sio(server, token);
   }, this));
 };
 
@@ -91,7 +85,7 @@ Pomelo.prototype.notify = function (route, data) {
   this.request(route, data);
 };
 
-Pomelo.prototype._sio = function (server) {
+Pomelo.prototype._sio = function (server, currentToken) {
   // @doc: https://github.com/Automattic/engine.io-client#methods
   var options = _.defaults(this.options.sio, {
     // multiplex: true,
@@ -105,12 +99,12 @@ Pomelo.prototype._sio = function (server) {
     query: 'device=' + this.options.device
   });
 
-  var url = server.host;
+  var currentUrl = server.host;
   if (server.port) {
-    url += ':' + server.port;
+    currentUrl += ':' + server.port;
   }
 
-  this.socket = require('socket.io-client')(url, options); // lazy load
+  this.socket = require('socket.io-client')(currentUrl, options); // lazy load
 
   // triggered when server has confirmed user authentication
   this.socket.on('authenticated', _.bind(function () {
@@ -123,12 +117,12 @@ Pomelo.prototype._sio = function (server) {
 
     // special case, reconnection with an expired token
     if (error.message === 'jwt expired') {
-      this.options.invalidToken(_.bind(function (err, token) {
+      this.options.invalidToken(_.bind(function (err, newToken) {
         if (err) {
           return this.trigger('error', err);
         }
-        this.token = token;
-        this._sio(server);
+        currentToken = newToken;
+        this._sio(server, currentToken);
       }, this));
     }
 
@@ -175,8 +169,8 @@ Pomelo.prototype._sio = function (server) {
 
   // socket listener are set, go connect, then authenticate
   this.socket.on('connect', _.bind(function () {
-    this.options.debug('connected to ' + url);
-    this.socket.emit('authenticate', { token: this.token });
+    this.options.debug('connected to ' + currentUrl, 'now authenticate with', currentToken);
+    this.socket.emit('authenticate', { token: currentToken });
   }, this));
 };
 
