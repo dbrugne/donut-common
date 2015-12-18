@@ -322,8 +322,8 @@ Ws.prototype.roomDeban = function (roomId, userId, callback) {
 
   this.pomeloRequest('chat.roomDebanHandler.call', data, callback);
 };
-Ws.prototype.roomViewed = function (roomId, events) {
-  var data = {room_id: roomId, events: events};
+Ws.prototype.roomViewed = function (roomId) {
+  var data = {room_id: roomId};
   this.options.debug('io:out:room:viewed', data);
   this.pomelo.notify('chat.roomViewedHandler.call', data);
 };
@@ -437,8 +437,8 @@ Ws.prototype.userUpdate = function (fields, callback) {
   var data = {data: fields};
   this.pomeloRequest('chat.userUpdateHandler.call', data, callback);
 };
-Ws.prototype.userViewed = function (userId, events) {
-  var data = {user_id: userId, events: events};
+Ws.prototype.userViewed = function (userId) {
+  var data = {user_id: userId};
   this.options.debug('io:out:user:viewed', data);
   this.pomelo.notify('chat.userViewedHandler.call', data);
 };
