@@ -193,48 +193,48 @@ describe('_find()', function() {
 
 describe('toObject()', function() {
   it('is function', function () {
-    common.markup.toObject.should.be.a('function');
+    common.markup.markupToObject.should.be.a('function');
   });
   it('find user mention', function () {
-    var element = common.markup.toObject('[@¦eedf43d2fddf4df2f3df4200¦damien]');
+    var element = common.markup.markupToObject('[@¦eedf43d2fddf4df2f3df4200¦damien]');
     element.should.have.property('match').with.equal('[@¦eedf43d2fddf4df2f3df4200¦damien]');
     element.should.have.property('type').with.equal('user');
     element.should.have.property('id').with.equal('eedf43d2fddf4df2f3df4200');
     element.should.have.property('title').with.equal('@damien');
   });
   it('find room mention', function () {
-    var element = common.markup.toObject('[#¦eedf43d2fddf4df2f3df4200¦donut]');
+    var element = common.markup.markupToObject('[#¦eedf43d2fddf4df2f3df4200¦donut]');
     element.should.have.property('match').with.equal('[#¦eedf43d2fddf4df2f3df4200¦donut]');
     element.should.have.property('type').with.equal('room');
     element.should.have.property('id').with.equal('eedf43d2fddf4df2f3df4200');
     element.should.have.property('title').with.equal('#donut');
   });
   it('find room in group mention', function () {
-    var element = common.markup.toObject('[#¦eedf43d2fddf4df2f3df4200¦donut/test]');
+    var element = common.markup.markupToObject('[#¦eedf43d2fddf4df2f3df4200¦donut/test]');
     element.should.have.property('match').with.equal('[#¦eedf43d2fddf4df2f3df4200¦donut/test]');
     element.should.have.property('type').with.equal('room');
     element.should.have.property('id').with.equal('eedf43d2fddf4df2f3df4200');
     element.should.have.property('title').with.equal('#donut/test');
   });
   it('find group in group mention', function () {
-    var element = common.markup.toObject('[#¦eedf43d2fddf4df2f3df4200¦donut/]');
+    var element = common.markup.markupToObject('[#¦eedf43d2fddf4df2f3df4200¦donut/]');
     element.should.have.property('match').with.equal('[#¦eedf43d2fddf4df2f3df4200¦donut/]');
     element.should.have.property('type').with.equal('group');
     element.should.have.property('id').with.equal('eedf43d2fddf4df2f3df4200');
     element.should.have.property('title').with.equal('#donut/');
   });
   it('find link', function () {
-    var element = common.markup.toObject('[url¦test.com¦http://test.com]');
+    var element = common.markup.markupToObject('[url¦test.com¦http://test.com]');
     element.should.have.property('match').with.equal('[url¦test.com¦http://test.com]');
     element.should.have.property('type').with.equal('url');
     element.should.have.property('title').with.equal('test.com');
     element.should.have.property('href').with.equal('http://test.com');
   });
   it('find complex link', function () {
-    common.markup.toObject('[url¦test.com/#api-test¦http://test.com/#api-test]')
+    common.markup.markupToObject('[url¦test.com/#api-test¦http://test.com/#api-test]')
       .should.have.property('href')
       .with.equal('http://test.com/#api-test');
-    common.markup.toObject('[url¦test.com/?foo=bar&test¦http://test.com/?foo=bar&test]')
+    common.markup.markupToObject('[url¦test.com/?foo=bar&test¦http://test.com/?foo=bar&test]')
       .should.have.property('href')
       .with.equal('http://test.com/?foo=bar&test');
   });
